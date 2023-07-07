@@ -1,0 +1,29 @@
+{
+  "type": "tree",
+  "name": "chosenTemplate",
+  "message": "Choose your desired template",
+  "tree": [
+    {
+      "name": "React",
+      "children": [
+        {
+          "name": "CMS system",
+          "value": "https://github.com/Wck-iipi/Task-Management"
+        },
+        {
+          "name": "kolibri",
+          "value": "https://github.com/Wck-iipi/kolibri"
+        },
+        {
+          "name": "nested",
+          "children": [
+            {
+              "name": "Level 2: A",
+              "value": "https://github.com/Rich-Harris/degit/tree/master"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
