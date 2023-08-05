@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/Wck-iipi/template-manager#readme",
   "dependencies": {
+    "@inquirer/prompts": "^3.0.1",
     "degit": "^2.8.4",
     "inquirer": "^8.0.0",
     "inquirer-tree-prompt": "^1.1.2"
