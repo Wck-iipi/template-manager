@@ -6,6 +6,11 @@ const path = require("path");
 
 const templates = require("./templates.json");
 
+
+//TODO - Add a feature to add template to base of templates.json
+//TODO - Remove the unnecessary create a new object and others while deleting and while creating
+//TODO - Add bash script support
+
 function writeJSONFile(filename, jsonData) {
   const jsonString = JSON.stringify(jsonData);
   fs.writeFileSync(filename, jsonString);
@@ -56,7 +61,7 @@ function searchAndDelete(data, valueToBeFound) {
 function removeChildrenIfEmpty(data) {
   if (Array.isArray(data)) {
     for (const item of data) {
-      if (item.children && JSON.stringify(item.children[0]) === '{}') {
+      if (item.children && JSON.stringify(item.children[0]) === "{}") {
         delete item.children;
       }
 
@@ -69,14 +74,12 @@ function removeChildrenIfEmpty(data) {
 
 function removeEmptyObjectFromChildrenArray(data) {
   if (Array.isArray(data)) {
-    data = data.filter((item) => {
-      return JSON.stringify(item) !== '{}';
-    })
     for (const item of data) {
       if (item.children) {
-        removeEmptyObjectFromChildrenArray(item.children);
+        item.children = removeEmptyObjectFromChildrenArray(item.children);
       }
     }
+    return data.filter((item) => JSON.stringify(item) !== "{}");
   }
 }
 
@@ -128,6 +131,7 @@ inquirer.prompt(templates).then((templateObject) => {
       if (searchAndDelete(templates.tree, template)) {
         removeChildrenIfEmpty(templates.tree);
         removeEmptyObjectFromChildrenArray(templates.tree);
+        templates.tree = templates.tree.filter((item) => JSON.stringify(item) !== "{}");
         writeJSONFile(path.join(__dirname + "/templates.json"), templates);
       } else {
         console.log("Name not found in templates.json.");
