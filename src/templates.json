@@ -25,6 +25,10 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Create new template",
+      "value": "newTemplate"
     }
   ]
 }
