@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const fs = require("fs");
 const TreePrompt = require("inquirer-tree-prompt");
 const degit = require("degit");
+const path = require("path");
 
 const templates = require("./templates.json");
 
@@ -31,6 +32,52 @@ function searchAndInsert(data, valueToBeFound, name, value) {
   }
 
   return false;
+}
+
+function searchAndDelete(data, valueToBeFound) {
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      if (item.value === valueToBeFound) {
+        delete item.value;
+        delete item.name;
+        delete item.children;
+        return true;
+      }
+
+      if (item.children && searchAndDelete(item.children, valueToBeFound)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function removeChildrenIfEmpty(data) {
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      if (item.children && JSON.stringify(item.children[0]) === '{}') {
+        delete item.children;
+      }
+
+      if (item.children) {
+        removeChildrenIfEmpty(item.children);
+      }
+    }
+  }
+}
+
+function removeEmptyObjectFromChildrenArray(data) {
+  if (Array.isArray(data)) {
+    data = data.filter((item) => {
+      return JSON.stringify(item) !== '{}';
+    })
+    for (const item of data) {
+      if (item.children) {
+        removeEmptyObjectFromChildrenArray(item.children);
+      }
+    }
+  }
 }
 
 inquirer.registerPrompt("tree", TreePrompt);
@@ -65,12 +112,27 @@ inquirer.prompt(templates).then((templateObject) => {
                 templateURL
               )
             ) {
-              writeJSONFile(path.join(__dirname + "templates.json"), templates);
+              writeJSONFile(
+                path.join(__dirname + "/templates.json"),
+                templates
+              );
             } else {
               console.log("Name not found in templates.json.");
             }
           });
       });
+  } else if (template === "deleteTemplate") {
+    inquirer.prompt(templates).then((nameWhereTemplateToBeDeletedObject) => {
+      const { template } = nameWhereTemplateToBeDeletedObject;
+
+      if (searchAndDelete(templates.tree, template)) {
+        removeChildrenIfEmpty(templates.tree);
+        removeEmptyObjectFromChildrenArray(templates.tree);
+        writeJSONFile(path.join(__dirname + "/templates.json"), templates);
+      } else {
+        console.log("Name not found in templates.json.");
+      }
+    });
   } else {
     inquirer
       .prompt({
