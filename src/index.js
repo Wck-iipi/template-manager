@@ -6,9 +6,6 @@ const path = require("path");
 
 const templates = require("./templates.json");
 
-
-//TODO - Add a feature to add template to base of templates.json
-//TODO - Remove the unnecessary create a new object and others while deleting and while creating
 //TODO - Add bash script support
 
 function writeJSONFile(filename, jsonData) {
@@ -87,6 +84,17 @@ inquirer.registerPrompt("tree", TreePrompt);
 inquirer.prompt(templates).then((templateObject) => {
   const { template } = templateObject;
   if (template === "newTemplate") {
+    var newTemplate = { ...templates };
+    newTemplate.tree = newTemplate.tree.filter((element) => {
+      return (
+        element.value != "newTemplate" && element.value != "deleteTemplate"
+      );
+    });
+    newTemplate.tree.push({
+      name: "Add to base",
+      value: "addToBase",
+    });
+
     inquirer
       .prompt([
         {
@@ -102,12 +110,21 @@ inquirer.prompt(templates).then((templateObject) => {
       ])
       .then((templateToBeAddedObject) => {
         inquirer
-          .prompt(templates)
+          .prompt(newTemplate)
           .then((nameWhereTemplateToBeInsertedObject) => {
             const { templateName, templateURL } = templateToBeAddedObject;
             const { template } = nameWhereTemplateToBeInsertedObject;
 
-            if (
+            if (template === "addToBase") {
+              templates.tree.splice(templates.tree.length - 2, 0, {
+                name: templateName,
+                value: templateURL,
+              });
+              writeJSONFile(
+                path.join(__dirname + "/templates.json"),
+                templates
+              );
+            } else if (
               searchAndInsert(
                 templates.tree,
                 template,
@@ -125,13 +142,21 @@ inquirer.prompt(templates).then((templateObject) => {
           });
       });
   } else if (template === "deleteTemplate") {
-    inquirer.prompt(templates).then((nameWhereTemplateToBeDeletedObject) => {
+    var deleteTemplate = { ...templates };
+    deleteTemplate.tree = deleteTemplate.tree.filter((element) => {
+      return (
+        element.value != "newTemplate" && element.value != "deleteTemplate"
+      );
+    });
+    inquirer.prompt(deleteTemplate).then((nameWhereTemplateToBeDeletedObject) => {
       const { template } = nameWhereTemplateToBeDeletedObject;
 
       if (searchAndDelete(templates.tree, template)) {
         removeChildrenIfEmpty(templates.tree);
         removeEmptyObjectFromChildrenArray(templates.tree);
-        templates.tree = templates.tree.filter((item) => JSON.stringify(item) !== "{}");
+        templates.tree = templates.tree.filter(
+          (item) => JSON.stringify(item) !== "{}"
+        );
         writeJSONFile(path.join(__dirname + "/templates.json"), templates);
       } else {
         console.log("Name not found in templates.json.");
