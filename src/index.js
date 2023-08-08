@@ -6,9 +6,35 @@ const path = require("path");
 
 const templates = require("./templates.json");
 
+// 1st TODO - Add option to add new bash template to templates.json
+// 2nd TODO - Run bash script when specific value is chosen
+
 function writeJSONFile(filename, jsonData) {
   const jsonString = JSON.stringify(jsonData);
   fs.writeFileSync(filename, jsonString);
+}
+
+function searchAndCheckIfGithub(data, valueToBeFound) {
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      if (item.value === valueToBeFound) {
+        if (item.type === "github") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      if (
+        item.children &&
+        searchAndCheckIfGithub(item.children, valueToBeFound)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 function searchAndInsert(data, valueToBeFound, name, value) {
@@ -110,21 +136,22 @@ inquirer.prompt(templates).then((templateObject) => {
           type: "list",
           name: "templateType",
           message: "Bash script or github template?",
-          choices: ["bash", "github"]
-        }
+          choices: ["bash", "github"],
+        },
       ])
       .then((templateToBeAddedObject) => {
         inquirer
           .prompt(newTemplate)
           .then((nameWhereTemplateToBeInsertedObject) => {
-            const { templateName, templateURL, templateType } = templateToBeAddedObject;
+            const { templateName, templateURL, templateType } =
+              templateToBeAddedObject;
             const { template } = nameWhereTemplateToBeInsertedObject;
 
             if (template === "addToBase") {
               templates.tree.splice(templates.tree.length - 2, 0, {
                 name: templateName,
                 value: templateURL,
-                type: templateType
+                type: templateType,
               });
               writeJSONFile(
                 path.join(__dirname + "/templates.json"),
@@ -154,20 +181,22 @@ inquirer.prompt(templates).then((templateObject) => {
         element.value != "newTemplate" && element.value != "deleteTemplate"
       );
     });
-    inquirer.prompt(deleteTemplate).then((nameWhereTemplateToBeDeletedObject) => {
-      const { template } = nameWhereTemplateToBeDeletedObject;
+    inquirer
+      .prompt(deleteTemplate)
+      .then((nameWhereTemplateToBeDeletedObject) => {
+        const { template } = nameWhereTemplateToBeDeletedObject;
 
-      if (searchAndDelete(templates.tree, template)) {
-        removeChildrenIfEmpty(templates.tree);
-        removeEmptyObjectFromChildrenArray(templates.tree);
-        templates.tree = templates.tree.filter(
-          (item) => JSON.stringify(item) !== "{}"
-        );
-        writeJSONFile(path.join(__dirname + "/templates.json"), templates);
-      } else {
-        console.log("Name not found in templates.json.");
-      }
-    });
+        if (searchAndDelete(templates.tree, template)) {
+          removeChildrenIfEmpty(templates.tree);
+          removeEmptyObjectFromChildrenArray(templates.tree);
+          templates.tree = templates.tree.filter(
+            (item) => JSON.stringify(item) !== "{}"
+          );
+          writeJSONFile(path.join(__dirname + "/templates.json"), templates);
+        } else {
+          console.log("Name not found in templates.json.");
+        }
+      });
   } else {
     inquirer
       .prompt({
@@ -180,19 +209,24 @@ inquirer.prompt(templates).then((templateObject) => {
       })
       .then((locationObject) => {
         const { location } = locationObject;
-        const emitter = degit(template, {
-          cache: false,
-          force: true,
-          verbose: true,
-        });
 
-        emitter.on("info", (info) => {
-          console.log(info.message);
-        });
+        if (searchAndCheckIfGithub(templates.tree, template)) {
+          const emitter = degit(template, {
+            cache: false,
+            force: true,
+            verbose: true,
+          });
 
-        emitter.clone(location).then(() => {
-          console.log("done");
-        });
+          emitter.on("info", (info) => {
+            console.log(info.message);
+          });
+
+          emitter.clone(location).then(() => {
+            console.log("done");
+          });
+        } else {
+          // Write run bash script here
+        }
       });
   }
 });
