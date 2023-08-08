@@ -5,21 +5,34 @@
   "tree": [
     {
       "name": "React",
+      "type": "github",
       "value": "tiged/tiged",
       "children": [
         {
           "name": "CMS system",
+          "type": "github",
           "value": "Wck-iipi/Task-Management"
         },
         {
           "name": "kolibri",
-          "value": "Wck-iipi/kolibri"
+          "type": "github",
+          "value": "Wck-iipi/kolibri",
+          "children": [
+            {
+              "name": "a",
+              "type": "github",
+              "value": "a"
+            }
+          ]
         },
         {
           "name": "nested",
+          "type": "github",
+          "value": "Rich-Harris/degit/tree/master",
           "children": [
             {
               "name": "Level 2: A",
+              "type": "github",
               "value": "Rich-Harris/degit/tree/master"
             }
           ]
@@ -28,7 +41,13 @@
     },
     {
       "name": "Create new template",
+      "type": "github",
       "value": "newTemplate"
+    },
+    {
+      "name": "Delete new template",
+      "type": "github",
+      "value": "deleteTemplate"
     }
   ]
 }
