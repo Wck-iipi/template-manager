@@ -6,8 +6,6 @@ const path = require("path");
 
 const templates = require("./templates.json");
 
-//TODO - Add bash script support
-
 function writeJSONFile(filename, jsonData) {
   const jsonString = JSON.stringify(jsonData);
   fs.writeFileSync(filename, jsonString);
@@ -43,6 +41,7 @@ function searchAndDelete(data, valueToBeFound) {
         delete item.value;
         delete item.name;
         delete item.children;
+        delete item.type;
         return true;
       }
 
@@ -107,18 +106,25 @@ inquirer.prompt(templates).then((templateObject) => {
           name: "templateURL",
           message: "Enter the template URL: ",
         },
+        {
+          type: "list",
+          name: "templateType",
+          message: "Bash script or github template?",
+          choices: ["bash", "github"]
+        }
       ])
       .then((templateToBeAddedObject) => {
         inquirer
           .prompt(newTemplate)
           .then((nameWhereTemplateToBeInsertedObject) => {
-            const { templateName, templateURL } = templateToBeAddedObject;
+            const { templateName, templateURL, templateType } = templateToBeAddedObject;
             const { template } = nameWhereTemplateToBeInsertedObject;
 
             if (template === "addToBase") {
               templates.tree.splice(templates.tree.length - 2, 0, {
                 name: templateName,
                 value: templateURL,
+                type: templateType
               });
               writeJSONFile(
                 path.join(__dirname + "/templates.json"),
