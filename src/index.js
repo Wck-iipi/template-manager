@@ -3,10 +3,10 @@ const fs = require("fs");
 const TreePrompt = require("inquirer-tree-prompt");
 const degit = require("degit");
 const path = require("path");
-
+const shell = require("shelljs");
 const templates = require("./templates.json");
 
-// 1st TODO - Add option to add new bash template to templates.json
+
 // 2nd TODO - Run bash script when specific value is chosen
 
 function writeJSONFile(filename, jsonData) {
@@ -226,6 +226,9 @@ inquirer.prompt(templates).then((templateObject) => {
           });
         } else {
           // Write run bash script here
+          console.log(template, location);
+          shell.exec(`bash ${template} ${location}`);
+          
         }
       });
   }

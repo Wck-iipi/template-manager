@@ -21,7 +21,8 @@
     "@inquirer/prompts": "^3.0.1",
     "degit": "^2.8.4",
     "inquirer": "^8.0.0",
-    "inquirer-tree-prompt": "^1.1.2"
+    "inquirer-tree-prompt": "^1.1.2",
+    "shelljs": "^0.8.5"
   },
   "devDependencies": {
     "eslint": "^8.46.0"
