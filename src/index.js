@@ -223,12 +223,12 @@ inquirer.prompt(templates).then((templateObject) => {
 
           emitter.clone(location).then(() => {
             console.log("done");
+            shell.exec("npm install");
           });
         } else {
           // Write run bash script here
           console.log(template, location);
           shell.exec(`bash ${template} ${location}`);
-          
         }
       });
   }
